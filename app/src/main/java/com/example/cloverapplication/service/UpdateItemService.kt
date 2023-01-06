@@ -1,6 +1,9 @@
 package com.example.cloverapplication.service
 
 import android.content.Context
+import com.clover.sdk.v3.inventory.InventoryConnector
+import com.clover.sdk.v3.inventory.Modifier
+import com.clover.sdk.v3.inventory.ModifierGroup
 import com.clover.sdk.v3.order.OrderConnector
 import com.example.cloverapplication.database.AppDatabase
 import com.example.cloverapplication.database.entity.UpdateItem
@@ -12,7 +15,8 @@ import java.util.*
 
 class UpdateItemService(
     private val context: Context,
-    private val orderConnector: OrderConnector
+    private val orderConnector: OrderConnector,
+    private val inventoryConnector: InventoryConnector
 ) {
 
     suspend fun getAllUpdateItems(): List<UpdateItem> {
@@ -35,9 +39,10 @@ class UpdateItemService(
                 updateItems.add(
                     UpdateItem(oldPrice, newPrice, Date().time, orderId, it.id)
                 )
+                val priceForAddToLineItem = (percent * it.price / 100)
+                println(priceForAddToLineItem)
+                updateLineItemOnScreen(percent, priceForAddToLineItem, orderId, it.id)
                 it.price = (newPrice * 100).toLong()
-                //For showing that the item line obj have new price
-                println(it.toString())
             }
             .also {
                 if (updateItems.isNotEmpty()) {
@@ -50,6 +55,20 @@ class UpdateItemService(
         AppDatabase.getDatabase(context)
             .updateItemDao()
             .insertAllUpdateItem(updateItems)
+    }
+
+    private suspend fun updateLineItemOnScreen(
+        percent: Int,
+        price: Long,
+        orderId: String,
+        lineItemId: String) {
+        val name = "Updating price by $percent"
+        val modifierGroup = inventoryConnector.createModifierGroup(ModifierGroup().setName(name))
+        val modifier: Modifier =
+            inventoryConnector
+                .createModifier(modifierGroup.id, Modifier().setName(name).setPrice(price))
+
+        orderConnector.addLineItemModification(orderId, lineItemId, modifier)
     }
 
 }

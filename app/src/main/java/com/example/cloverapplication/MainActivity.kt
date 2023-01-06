@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.clover.sdk.util.CloverAccount
+import com.clover.sdk.v3.inventory.InventoryConnector
 import com.clover.sdk.v3.order.OrderConnector
 import com.example.cloverapplication.adapter.UpdateItemAdapter
 import com.example.cloverapplication.databinding.ActivityMainBinding
@@ -27,6 +28,7 @@ class MainActivity: AppCompatActivity() {
 
     private var mAccount: Account? = null
     private var mOrderConnector: OrderConnector? = null
+    private var mInventoryConnector: InventoryConnector? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +46,11 @@ class MainActivity: AppCompatActivity() {
         super.onResume()
 
         checkingCloverAccount()
-        connectToCloverConnector()
+        connectToCloverOrder()
+        connectToCloverInventory()
 
-        updateItemService = UpdateItemService(applicationContext, mOrderConnector!!)
+        updateItemService =
+            UpdateItemService(applicationContext, mOrderConnector!!, mInventoryConnector!!)
 
         CoroutineScope(Job() + Dispatchers.Main).launch {
             val items = updateItemService.getAllUpdateItems()
@@ -61,23 +65,39 @@ class MainActivity: AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disconnectToCloverConnector()
+        disconnectFromCloverOrder()
+        disconnectFromCloverInventory()
 
         EventBus.getDefault().unregister(this)
     }
 
-    private fun connectToCloverConnector() {
-        disconnectToCloverConnector()
+    private fun connectToCloverOrder() {
+        disconnectFromCloverOrder()
         if (mAccount != null) {
             mOrderConnector = OrderConnector(this, mAccount, null)
             mOrderConnector!!.connect()
         }
     }
 
-    private fun disconnectToCloverConnector() {
+    private fun disconnectFromCloverOrder() {
         if (mOrderConnector != null) {
             mOrderConnector!!.disconnect()
             mOrderConnector = null
+        }
+    }
+
+    private fun connectToCloverInventory() {
+        disconnectFromCloverInventory()
+        if (mAccount != null) {
+            mInventoryConnector = InventoryConnector(this, mAccount, null)
+            mInventoryConnector!!.connect()
+        }
+    }
+
+    private fun disconnectFromCloverInventory() {
+        if (mInventoryConnector != null) {
+            mInventoryConnector!!.disconnect()
+            mInventoryConnector = null
         }
     }
 
