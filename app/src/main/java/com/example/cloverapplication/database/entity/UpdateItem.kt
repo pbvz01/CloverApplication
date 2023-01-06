@@ -22,4 +22,12 @@ data class UpdateItem(
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         return formatter.format(date)
     }
+
+    fun getCorrectOldPrice(): String {
+        return "$oldPrice$"
+    }
+
+    fun getCorrectNewPrice(): String {
+        return "$newPrice$"
+    }
 }

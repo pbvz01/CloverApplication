@@ -3,6 +3,7 @@ package com.example.cloverapplication
 import android.accounts.Account
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.math.MathUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.clover.sdk.util.CloverAccount
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import kotlin.random.Random
 
 
 class MainActivity: AppCompatActivity() {
@@ -32,7 +34,7 @@ class MainActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         EventBus.getDefault().register(this)
 
         activityBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -113,10 +115,10 @@ class MainActivity: AppCompatActivity() {
 
     @Subscribe
     fun handelRequestFromOrderReceiver(event: AddedLineItemsReceiver) {
-        val percent = 25
+        val percent = Random.nextInt(5, 26)
         CoroutineScope(Job() + Dispatchers.Default).launch {
             updateItemService.updateItemsPriceOnPercentByOrderId(
-                percent = 25,
+                percent = percent,
                 orderId = event.orderId,
                 lineItemsId = event.lineItems
             )

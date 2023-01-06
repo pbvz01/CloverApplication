@@ -7,7 +7,7 @@ import com.example.cloverapplication.database.entity.UpdateItem
 
 @Dao
 interface UpdateItemDao {
-    @Query("SELECT * FROM log_changed_item_price")
+    @Query("SELECT * FROM log_changed_item_price ORDER BY date DESC")
     suspend fun selectAllUpdateItem(): List<UpdateItem>
     //Kotlin + corot + room
     @Insert

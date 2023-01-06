@@ -18,7 +18,7 @@ class UpdateItemAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        var inflater = LayoutInflater.from(parent.context)
+        val inflater = LayoutInflater.from(parent.context)
 
         val listItemBinding = RecyclerviewItemBinding.inflate(inflater, parent, false)
         return MyViewHolder(listItemBinding)
