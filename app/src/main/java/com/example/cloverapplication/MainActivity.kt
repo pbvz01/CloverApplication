@@ -34,22 +34,23 @@ class MainActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         EventBus.getDefault().register(this)
+
+        mAccount = CloverAccount.getAccount(this)
+        checkingCloverAccount()
+        connectToCloverOrder()
+        connectToCloverInventory()
 
         activityBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityBinding.root)
         managerBinding = LinearLayoutManager(this)
 
-        mAccount = CloverAccount.getAccount(this)
+
     }
 
     override fun onResume() {
         super.onResume()
-
-        checkingCloverAccount()
-        connectToCloverOrder()
-        connectToCloverInventory()
 
         updateItemService =
             UpdateItemService(applicationContext, mOrderConnector!!, mInventoryConnector!!)
