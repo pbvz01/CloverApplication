@@ -32,16 +32,20 @@ class UpdateItemService(
         val lineItems = orderConnector.getOrder(orderId).lineItems
 
         lineItems
-            .filter { lineItemsId.contains(it.id) }
+            .filter{lineItemsId.contains(it.id)}
+            .distinctBy { it.taxRates[0].id }
             .forEach {
                 val oldPrice = (it.price / 100).toDouble()
                 val newPrice = oldPrice + (percent * oldPrice / 100)
                 updateItems.add(
                     UpdateItem(oldPrice, newPrice, Date().time, orderId, it.id)
                 )
-                val priceForAddToLineItem = (percent * it.price / 100)
-                println(priceForAddToLineItem)
-                updateLineItemOnScreen(percent, priceForAddToLineItem, orderId, it.id)
+
+                if(it.modifications == null) {
+                    val priceForAddToLineItem = ((percent * it.price / 100) * lineItemsId.size)
+                    updateLineItemOnScreen(percent, priceForAddToLineItem, orderId, it.id)
+                }
+
                 it.price = (newPrice * 100).toLong()
             }
             .also {
@@ -49,6 +53,8 @@ class UpdateItemService(
                     addUpdateItemsToDB(updateItems)
                 }
             }
+
+
     }
 
     private suspend fun addUpdateItemsToDB(updateItems: List<UpdateItem>) {
@@ -57,12 +63,13 @@ class UpdateItemService(
             .insertAllUpdateItem(updateItems)
     }
 
+
     private suspend fun updateLineItemOnScreen(
         percent: Int,
         price: Long,
         orderId: String,
         lineItemId: String) {
-        val name = "Updating price by $percent"
+        val name = "Updating price by $percent%"
         val modifierGroup = inventoryConnector.createModifierGroup(ModifierGroup().setName(name))
         val modifier: Modifier =
             inventoryConnector
